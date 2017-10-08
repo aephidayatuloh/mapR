@@ -55,11 +55,13 @@ shinyUI(fluidPage(
   fluidRow(
     column(3,
            selectInput(inputId = "data", "Sektor", 
-                       choices = list("Indeks Pembangunan Manusia", 
-                                      "Kemiskinan dan Ketimpangan",
-                                      "Pendidikan")),
+                       choices = list("Indeks Pembangunan Manusia" #, 
+                                      # "Kemiskinan dan Ketimpangan",
+                                      # "Pendidikan"
+                                      )),
            selectInput(inputId = "tahun", "Tahun", 
-                       choices = c(2010:2016)),
+                       choices = list("Pilih..."="Pilih...", "2010"=2010, "2011"=2011, 
+                                      "2012"=2012, "2013"=2013, "2014"=2014, "2015"=2015, "2016"=2016)),
            column(6,
                   colourInput("collo", "Rendah", value = "white")
                 ),
@@ -75,8 +77,9 @@ shinyUI(fluidPage(
            br(),
            br(),
            
-           h3("Tahukah Anda?"),
-           p("Hingga tahun 2017 Indonesia terdiri dari 34 provinsi dan 444 kabupaten/kota.")
+           h3("Tahukah Anda?", style="color: red; weight: bold;"),
+           p("Hingga tahun 2017 Indonesia terdiri dari 34 provinsi dan 444 kabupaten/kota."),
+           tagList("Website :", a("Departemen Statistika IPB", href="http://www.stat.ipb.ac.id/en/"))
            ),
     column(9,
            # tableOutput("preview"),

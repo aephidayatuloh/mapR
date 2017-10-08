@@ -54,35 +54,65 @@ load("data/mapR.RData")
 # You need the aesthetics long, lat, and group.
 shinyServer(function(input, output, session){
   
-  fil_labs <- reactive({
-    ifelse(input$tahun=="Select", "Provinsi", paste("Tahun", input$tahun))
-  })
-  fil_value <- reactive({
-    ifelse(input$tahun=="Select", "NAME_1", paste("tahun", input$tahun, sep = "_"))
+  observe({
+    showNotification("Gunakan peramban Mozilla Firefox atau Chrome untuk tampilan optimal", type = "message", duration = 30)
   })
   
+  fil_labs <- reactive({
+    ifelse(input$tahun=="Pilih...", "Provinsi", paste("Tahun", input$tahun))
+  })
+  # fil_value <- reactive({
+  #   ifelse(input$tahun=="Pilih...", "NAME_1", paste("tahun", input$tahun, sep = "_"))
+  # })
+  
     datasetInput <- reactive({
-      shp_df
+      switch(input$data,
+             "Indeks Pembangunan Manusia"=df2
+             )
     })
     
     output$mapTitle <- renderUI({
-      h4(paste(input$data, "Tahun", input$tahun))
+      if(input$tahun == "Pilih..."){
+        h4("Provinsi di Indonesia")
+      }
+      else {
+        h4(paste(input$data, "Tahun", input$tahun)) 
+      }
     })
+    
     plotInput <- reactive({
-      mapProv <- ggplot(data = df2,
-                    aes_string(x = "long", y = "lat", group = "group", 
-                               # fill = paste("tahun", input$tahun, sep = "_"))) +
-                               fill = fil_value())) +
-        geom_polygon() +
-        theme_classic() +
-        coord_equal() +
-        theme(axis.line=element_blank(),axis.text.x=element_blank(),
-              axis.text.y=element_blank(),axis.ticks=element_blank(),
-              axis.title.x=element_blank(),
-              axis.title.y=element_blank()) +
-        labs(fill = fil_labs(),
-             caption = paste("Sumber: BPS, 2017")) +
+      if(input$tahun == "Pilih..."){
+        mapProv <- ggplot(data = df2,
+                          aes_string(x = "long", y = "lat", group = "group", 
+                                     # fill = paste("tahun", input$tahun, sep = "_"))) +
+                                     fill = "NAME_1")) +
+          geom_polygon() +
+          theme_classic() +
+          coord_equal() +
+          theme(axis.line=element_blank(),axis.text.x=element_blank(),
+                axis.text.y=element_blank(),axis.ticks=element_blank(),
+                axis.title.x=element_blank(),
+                axis.title.y=element_blank()) +
+          labs(fill = fil_labs(),
+               caption = paste("Sumber: BPS, 2017"))
+      } else {
+        mapProv <- ggplot(data = df2,
+                          aes_string(x = "long", y = "lat", group = "group", 
+                                     fill = paste("tahun", input$tahun, sep = "_"))) +
+                                     # fill = fil_value())) +
+          geom_polygon() +
+          theme_classic() +
+          coord_equal() +
+          theme(axis.line = element_blank(),
+                axis.text.x = element_blank(),
+                axis.text.y = element_blank(),
+                axis.ticks = element_blank(),
+                axis.title.x = element_blank(),
+                axis.title.y = element_blank()) +
+          labs(fill = fil_labs(),
+               caption = paste("Sumber: BPS, 2017")) +
           scale_fill_gradient(low = input$collo, high = input$colhi)
+      }
     })
     
     output$mapPlot <- renderPlot({
@@ -94,13 +124,13 @@ shinyServer(function(input, output, session){
         paste(input$data, "_", input$tahun, '.csv', sep='') 
       },
       content = function(file) {
-        write.csv(datatasetInput(), file)
+        write.csv(df2, file)
       }
     )
     output$downloadMap <- downloadHandler(
       filename = function() { paste(input$data, "_", input$tahun, '.png', sep='') },
       content = function(file) {
-        device <- function(..., width, height) grDevices::png(..., width = width, height = height, res = 300, units = "in")
+        device <- function(..., width, height) grDevices::png(..., width = width, height = height, res = 1300, units = "in")
         ggsave(file, plot = plotInput(), device = device)
       }
     )
